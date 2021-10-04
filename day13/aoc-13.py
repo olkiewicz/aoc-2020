@@ -24,13 +24,12 @@ def check_result(number, ids, idxs):
     for i in range(len(ids)):
         index = idxs[i]
         bus_id = ids[i]
-        # print(f'num={number}, bus_id={bus_id}, idx={index}, XX={(number + index) % bus_id}')
         if not (number + index) % bus_id == 0:
             return False
     return True
 
 
-def calculate_result_part2(array_input):
+def calculate_result_part22(array_input):
     entries = [bus for bus in array_input[1].split(',')]
     bus_ids, bus_idxs = [], []
     max_id, max_idx = 0, 0
@@ -41,35 +40,50 @@ def calculate_result_part2(array_input):
             bus_idxs.append(index)
             if int(bus_id) > max_id:
                 max_id, max_idx = int(bus_id), index
-    first_bus_id = bus_ids[0] # 19
-    # num = 380009752565841
+    first_bus_id = bus_ids[0]
+    number = calculate_first_step(first_bus_id, bus_ids[1], bus_idxs[1])
+    step = first_bus_id * bus_ids[1]
+    for idx in range(2, len(bus_ids)):
+        current_bus = bus_ids[idx]
+        number = calculate_next_step(number, first_bus_id, current_bus, bus_idxs[idx], step)
+        step *= current_bus
+    return number
+
+
+def calculate_first_step(first_num, second_num, time_after):
     num = 0
-    print(f'id={max_id}, idx={max_idx}')
-    # print(check_result(1068781, bus_ids, bus_idxs))
-
-    # while True:
-    #     if check_result(num, bus_ids, bus_idxs):
-    #         break
-    #     num += first_bus_id
-    #     print(num)
-    return num
-
-
-def find_z(first_number, second_number, a, b):
-    num = 1
     while True:
-        if (num + a) % first_number == 0 and  (num + b) % second_number == 0:
-            print(num)
-            break
-        num += 1
+        if (num + time_after) % second_num == 0 and (num % first_num) == 0:
+            return num
+        num += first_num
+
+
+def calculate_next_step(start, first_num, second_num, delay, step):
+    num = start
+    while True:
+        if (num + delay) % second_num == 0 and (num % first_num) == 0:
+            return num
+        num += step
 
 
 if __name__ == '__main__':
     puzzle_input = load('input-13')
     # calculate_result(puzzle_input)
     # print(calculate_result_part2(puzzle_input))
-    find_z(13, 19, 2, 3)
-    find_z(17, 206, 0, 0)
+    # find_z(13, 19, 2, 3)
+    # find_z(17, 206, 0, 0)
+    # x = cal(0, 7, 13, 1)
+    # print(f'res={x}')
+    # y = cal_next(77, 7, 59, 4, 7*13)
+    # print(y)
+    # z = cal_next(350, 7, 31, 6, 7*13*59)
+    # print(z)
+    # a = cal_next(70147, 7, 19, 7, 7*13*59*31)
+    # print(a)
+    # ids = [7, 13, 59]
+    # idxs = [0, 1, 4]
+    # print(check_result(y, ids, idxs))
+    print(calculate_result_part22(puzzle_input))
 
 
 # 380000000000000 too low
