@@ -33,7 +33,7 @@ class Rule:
             messages.append(str(message))
         if is_all_ok:
             self.is_calculated = True
-            self.valid_messages = messages
+            self.valid_messages = list(set(messages))
         return is_all_ok
 
     def __str__(self):
@@ -46,7 +46,6 @@ class Rule:
 
 
 def get_valid_messages(message: str, calculated_rules_dict: dict):
-    # messages = [list(m) for m in message.split(' | ')]
     messages = [list(m) for m in message.split(' | ')]
     for m in messages:
         m.remove(' ')
@@ -56,12 +55,19 @@ def get_valid_messages(message: str, calculated_rules_dict: dict):
         if mes not in unique_rules:
             return None
         else:
-            x = [r for r in multiply_rules(mes, messages, calculated_rules_dict) if r]
-            res += x
+            computed_rules = [r for r in multiply_rules(mes, messages, calculated_rules_dict) if r]
+            for chars in computed_rules:
+                for char in chars:
+                    if char.isdigit():
+                        messages.append(computed_rules)
+                        break
+                    res += computed_rules
+
     return res
 
 
-def multiply_rules(rule_number: int, messages: list, unique_rules: dict):
+def multiply_rules(rule_number, messages: list, unique_rules: dict):
+    print(f'number: {rule_number}, messages: {messages}')
     size_of_used_number = len(unique_rules[rule_number])
     res = []
     for message in messages:
@@ -70,7 +76,7 @@ def multiply_rules(rule_number: int, messages: list, unique_rules: dict):
                 liter = unique_rules[rule_number][i]
                 text = ''.join([p.replace(f'{rule_number}', liter) for p in message])
                 res.append(text)
-    return res
+    return list(set(res))
 
 
 def load(name):
@@ -88,7 +94,6 @@ if __name__ == '__main__':
     calculated_rules = {}
     for line in rules_data:
         rule = Rule(line)
-        print(rule)
         if rule.is_calculated:
             calculated_rules[rule.number] = rule.valid_messages
         else:
@@ -99,4 +104,4 @@ if __name__ == '__main__':
             # calculated_rules[rule.number] = rule.valid_messages
             calculated_rules[rule.number] = new_definitions
             #rules.remove(rule)
-    print(calculated_rules)
+    print(f'end = {calculated_rules}')
