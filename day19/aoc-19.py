@@ -1,3 +1,6 @@
+from collections import Counter
+
+
 class Rule:
     # valid_messages = []
     # is_calculated = False
@@ -48,21 +51,21 @@ class Rule:
 def get_valid_messages(message: str, calculated_rules_dict: dict):
     messages = [list(m) for m in message.split(' | ')]
     for m in messages:
-        m.remove(' ')
+        if m.count(' ') > 0:
+            m.remove(' ')
     res = []
     unique_rules = list(set(message.replace('| ', '').split(' ')))
     for mes in unique_rules:
         if mes not in unique_rules:
             return None
         else:
-            computed_rules = [r for r in multiply_rules(mes, messages, calculated_rules_dict) if r]
+            computed_rules = [r for r in list(set(multiply_rules(mes, messages, calculated_rules_dict))) if r]
             for chars in computed_rules:
                 for char in chars:
                     if char.isdigit():
-                        messages.append(computed_rules)
+                        messages.append(chars)
                         break
                     res += computed_rules
-
     return res
 
 
@@ -71,12 +74,32 @@ def multiply_rules(rule_number, messages: list, unique_rules: dict):
     size_of_used_number = len(unique_rules[rule_number])
     res = []
     for message in messages:
-        if str(rule_number) in message:
+        mes = ' '.join(message)
+        if str(rule_number) in mes:
             for i in range(size_of_used_number):
                 liter = unique_rules[rule_number][i]
-                text = ''.join([p.replace(f'{rule_number}', liter) for p in message])
+                text = ''.join([p.replace(f'{rule_number}', liter) for p in mes]).replace(' ', '')
+                # text = [p.replace(f'{rule_number}', liter) for p in mes if p != ' ']
                 res.append(text)
-    return list(set(res))
+    # return list(set(res))
+    return res
+
+
+def clear_calculated_rules(_calculated_rules):
+    # for _rule in _calculated_rules[:]:
+    #     for char in _rule:
+    #         if char.isdigit():
+    #             _calculated_rules.remove(_rule)
+    # return _calculated_rules
+    c = [key for key in list(Counter(_calculated_rules).keys()) if has_no_digit(key)]
+    return c
+
+
+def has_no_digit(_text: str):
+    for char in _text:
+        if char.isdigit():
+            return False
+    return True
 
 
 def load(name):
@@ -98,10 +121,35 @@ if __name__ == '__main__':
             calculated_rules[rule.number] = rule.valid_messages
         else:
             rules.append(rule)
+    for rule in rules[:]:
+        if rule.compute_valid_messages(calculated_rules):
+            print(f'calculate {rule.number}')
+            new_definitions = get_valid_messages(rule.definition, calculated_rules)
+            new_definitions = clear_calculated_rules(list(set(new_definitions)))
+            # calculated_rules[rule.number] = rule.valid_messages
+            calculated_rules[rule.number] = list(set(new_definitions))
+            rules.remove(rule)
     for rule in rules:
         if rule.compute_valid_messages(calculated_rules):
+            print(f'calculate {rule.number}')
             new_definitions = get_valid_messages(rule.definition, calculated_rules)
+            new_definitions = clear_calculated_rules(list(set(new_definitions)))
             # calculated_rules[rule.number] = rule.valid_messages
-            calculated_rules[rule.number] = new_definitions
+            calculated_rules[rule.number] = list(set(new_definitions))
+            rules.remove(rule)
+    for rule in rules:
+        if rule.compute_valid_messages(calculated_rules):
+            print(f'calculate {rule.number}')
+            new_definitions = get_valid_messages(rule.definition, calculated_rules)
+            new_definitions = clear_calculated_rules(list(set(new_definitions)))
+            # calculated_rules[rule.number] = rule.valid_messages
+            calculated_rules[rule.number] = list(set(new_definitions))
             #rules.remove(rule)
     print(f'end = {calculated_rules}')
+    print()
+    print(content_data)
+    result = 0
+    for content in content_data:
+        if content in calculated_rules['0']:
+            result += 1
+    print(result)
