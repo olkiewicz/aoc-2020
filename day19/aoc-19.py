@@ -49,7 +49,9 @@ class Rule:
 
 
 def get_valid_messages(message: str, calculated_rules_dict: dict):
-    messages = [list(m) for m in message.split(' | ')]
+    # messages = [list(m) for m in message.split(' | ')]
+    # messages2 = list(set(message.replace('| ', '').split(' ')))
+    messages = [m.split(' ') for m in message.split(' | ')]
     for m in messages:
         if m.count(' ') > 0:
             m.remove(' ')
@@ -78,7 +80,9 @@ def multiply_rules(rule_number, messages: list, unique_rules: dict):
         if str(rule_number) in mes:
             for i in range(size_of_used_number):
                 liter = unique_rules[rule_number][i]
+                # text = ''.join([p.replace(f'{rule_number}', liter) for p in mes]).replace(' ', '')
                 text = ''.join([p.replace(f'{rule_number}', liter) for p in mes]).replace(' ', '')
+                text = mes.replace(f'{rule_number}', liter).replace(' ', '')
                 # text = [p.replace(f'{rule_number}', liter) for p in mes if p != ' ']
                 res.append(text)
     # return list(set(res))
@@ -112,7 +116,7 @@ def load(name):
 
 
 if __name__ == '__main__':
-    rules_data, content_data = load('input-19')
+    rules_data, content_data = load('input-19-copy')
     rules = []
     calculated_rules = {}
     for line in rules_data:
