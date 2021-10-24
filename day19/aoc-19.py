@@ -116,7 +116,7 @@ def load(name):
 
 
 if __name__ == '__main__':
-    rules_data, content_data = load('input-19-copy')
+    rules_data, content_data = load('input-19')
     rules = []
     calculated_rules = {}
     for line in rules_data:
