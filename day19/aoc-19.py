@@ -76,13 +76,18 @@ def multiply_rules(rule_number, messages: list, unique_rules: dict):
     size_of_used_number = len(unique_rules[rule_number])
     res = []
     for message in messages:
-        mes = ' '.join(message)
+        mes = None
+        if isinstance(message, str):
+            mes = message
+        else:
+            mes = ' '.join(message)
         if str(rule_number) in mes:
             for i in range(size_of_used_number):
                 liter = unique_rules[rule_number][i]
                 # text = ''.join([p.replace(f'{rule_number}', liter) for p in mes]).replace(' ', '')
-                text = ''.join([p.replace(f'{rule_number}', liter) for p in mes]).replace(' ', '')
-                text = mes.replace(f'{rule_number}', liter).replace(' ', '')
+                # text = ''.join([p.replace(f'{rule_number}', liter) for p in mes]).replace(' ', '')
+                text = mes.replace(f'{rule_number}', liter)
+                # text = ' '.join(mes.replace(f'{rule_number}', liter).replace(' ', ''))
                 # text = [p.replace(f'{rule_number}', liter) for p in mes if p != ' ']
                 res.append(text)
     # return list(set(res))
@@ -95,7 +100,7 @@ def clear_calculated_rules(_calculated_rules):
     #         if char.isdigit():
     #             _calculated_rules.remove(_rule)
     # return _calculated_rules
-    c = [key for key in list(Counter(_calculated_rules).keys()) if has_no_digit(key)]
+    c = [key.replace(' ', '') for key in list(Counter(_calculated_rules).keys()) if has_no_digit(key)]
     return c
 
 
@@ -116,7 +121,7 @@ def load(name):
 
 
 if __name__ == '__main__':
-    rules_data, content_data = load('input-19')
+    rules_data, content_data = load('input-19-copy')
     rules = []
     calculated_rules = {}
     for line in rules_data:
@@ -125,35 +130,51 @@ if __name__ == '__main__':
             calculated_rules[rule.number] = rule.valid_messages
         else:
             rules.append(rule)
-    for rule in rules[:]:
-        if rule.compute_valid_messages(calculated_rules):
-            print(f'calculate {rule.number}')
-            new_definitions = get_valid_messages(rule.definition, calculated_rules)
-            new_definitions = clear_calculated_rules(list(set(new_definitions)))
-            # calculated_rules[rule.number] = rule.valid_messages
-            calculated_rules[rule.number] = list(set(new_definitions))
-            rules.remove(rule)
-    for rule in rules:
-        if rule.compute_valid_messages(calculated_rules):
-            print(f'calculate {rule.number}')
-            new_definitions = get_valid_messages(rule.definition, calculated_rules)
-            new_definitions = clear_calculated_rules(list(set(new_definitions)))
-            # calculated_rules[rule.number] = rule.valid_messages
-            calculated_rules[rule.number] = list(set(new_definitions))
-            rules.remove(rule)
-    for rule in rules:
-        if rule.compute_valid_messages(calculated_rules):
-            print(f'calculate {rule.number}')
-            new_definitions = get_valid_messages(rule.definition, calculated_rules)
-            new_definitions = clear_calculated_rules(list(set(new_definitions)))
-            # calculated_rules[rule.number] = rule.valid_messages
-            calculated_rules[rule.number] = list(set(new_definitions))
-            #rules.remove(rule)
-    print(f'end = {calculated_rules}')
+    last = 10000
+    while len(rules) > 1:
+        if len(rules) == 2:
+            break
+        if last == len(rules):
+            break
+        else:
+            last = len(rules)
+        print(f'lef rules: {len(rules)}, rules: {[ru.number for ru in rules]}')
+        for rule in rules[:]:
+            if rule.compute_valid_messages(calculated_rules):
+                new_definitions = get_valid_messages(rule.definition, calculated_rules)
+                new_definitions = clear_calculated_rules(list(set(new_definitions)))
+                if len(new_definitions) > 0:
+                    calculated_rules[rule.number] = list(set(new_definitions))
+                    rules.remove(rule)
+                    break
+    print(f'end = {sorted(list(calculated_rules))}')
     print()
     print(content_data)
+
     result = 0
+    rule_31 = ['aaaaaaba', 'baaabbba', 'ababbaab', 'bbabbbba', 'aaabbbab', 'abbbaaba', 'abbbaaaa', 'abaabaab', 'abbbbaba',
+          'abbabbbb', 'aaaabbaa', 'aabbbaba', 'aabaabaa', 'aaaabbab', 'abbbbbbb', 'ababbabb', 'ababbbaa', 'aaabbabb',
+          'aabaabba', 'bababaaa', 'aaaabbba', 'abaabbab', 'babbabba', 'aaaabaaa', 'bbbbbbaa', 'bbabaaba', 'aaabaaba',
+          'bbbbabaa', 'baabaaaa', 'abbbaabb', 'bbababba', 'abbabaaa', 'abbbbbaa', 'babbaaba', 'babbbaaa', 'abbabbaa',
+          'abbababa', 'aababbaa', 'babbbbba', 'bbbaaaba', 'abbbbabb', 'abbaaabb', 'abaabbbb', 'abaaabbb', 'babaaaaa',
+          'aaabbbbb', 'abababaa', 'abaaaabb', 'abbabbab', 'ababbaba', 'abaaabaa', 'aaabaaab', 'abbbbaab', 'bbabbbaa',
+          'ababaaaa', 'bbbababa', 'aaabbbaa', 'baabbbaa', 'bbaaabba', 'aaaaaaaa', 'aaabbaaa', 'aaabbaba', 'aabaaaaa',
+          'aabbabba', 'aabbabaa', 'abbaaaab', 'aabababa', 'aaaaabab', 'bbaaabaa', 'babababa', 'babbbaba', 'baabbbba',
+          'aabbbbaa', 'ababaaba', 'baaabaaa']
+    # if '0' in calculated_rules:
+    d = set()
+    for x in rule_31:
+        d.add(len(x))
+    print(f'XX: {d}')
     for content in content_data:
-        if content in calculated_rules['0']:
+        if content[:8] in calculated_rules['8'] and content[8:16] in calculated_rules['42'] and content[16:24] in rule_31:
             result += 1
     print(result)
+
+#  362 too high
+#  356 ?
+#  278 too high
+#  105
+# 90, 91, 99, 102, 89,93,92
+
+# 90,89 is incorrect
