@@ -1,3 +1,6 @@
+from collections import Counter
+import math
+
 number_of_cycles = 0
 size_of_expanded_input = 0
 
@@ -108,6 +111,23 @@ def calculate_part2(cubes):
 
 
 if __name__ == '__main__':
-    puzzle_input = load('input-17')
-    init_state = expand_init_state(puzzle_input)
-    calculate_part2(init_state)
+    # puzzle_input = load('input-17')
+    # init_state = expand_init_state(puzzle_input)
+    # calculate_part2(init_state)
+    names = ["Sheldon", "Leonard", "Penny", "Rajesh", "Howard"]
+    size = len(names)
+    r = 6
+    p = math.floor(r / size)
+    l = math.log2(p)
+    power_of_2 = 2 ** math.floor(l)
+    rest = r - power_of_2 * size
+    rest += size + 1
+
+    dif = math.floor(rest / power_of_2)
+    # print(f'p={p}, num={l} = rest{rest}, 2^={2 ** math.floor(l)}, dif={dif}')
+    # rest = int((rest + 0) % size)
+
+    print(f'p={p}, num={l} = rest{rest}, cola={names[dif % size]}')
+
+
+
