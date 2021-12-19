@@ -109,8 +109,8 @@ def get_operator_packet(binary_data: str) -> Optional[Packet]:
         subpackets = get_all_subpackets(binary_data[index:index + total_length_of_subpackets])
         print(subpackets)
 
-        # if len(subpackets) == 0:
-        #     return None
+        if len(subpackets) == 0:
+            return None
 
     else:
         number_of_subpackets = int(binary_data[index:index + 11], 2)
