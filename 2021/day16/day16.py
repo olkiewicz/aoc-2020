@@ -1,4 +1,5 @@
 from typing import Optional
+import time
 
 
 class Packet:
@@ -23,6 +24,46 @@ class Packet:
             sum_of_version_numbers += subpacket.get_version_number_with_subpackets()
 
         return sum_of_version_numbers
+
+    def get_value(self):
+        if self.type_id == 4:
+            return self.number
+
+        elif self.type_id == 0:
+            value = 0
+            for subpacket in self.subpackets:
+                value += subpacket.get_value()
+            return value
+        elif self.type_id == 1:
+            value = 1
+            for subpacket in self.subpackets:
+                value *= subpacket.get_value()
+            return value
+        elif self.type_id == 2:
+            values = []
+            for subpacket in self.subpackets:
+                values.append(subpacket.get_value())
+            return min(values)
+        elif self.type_id == 3:
+            values = []
+            for subpacket in self.subpackets:
+                values.append(subpacket.get_value())
+            return max(values)
+        elif self.type_id == 5:
+            values = []
+            for subpacket in self.subpackets:
+                values.append(subpacket.get_value())
+            return 1 if values[0] > values[1] else 0
+        elif self.type_id == 6:
+            values = []
+            for subpacket in self.subpackets:
+                values.append(subpacket.get_value())
+            return 1 if values[0] < values[1] else 0
+        elif self.type_id == 7:
+            values = []
+            for subpacket in self.subpackets:
+                values.append(subpacket.get_value())
+            return 1 if values[0] == values[1] else 0
 
 
 def load(name: str) -> str:
@@ -131,13 +172,19 @@ def get_all_subpackets(binary_data: str, number_of_subpackets: int = 0) -> list:
     size = len(binary_data)
     min_literal_value_packet_size = 11
     min_operator_packet_size = 18
+    start_index = 0
 
-    if size == min_literal_value_packet_size:
-        subpacket = get_literal_value_packet(binary_data)
-        if subpacket:
-            subpackets.append(subpacket)
-            return subpackets
+    if size == min_literal_value_packet_size or size % min_literal_value_packet_size == 0:
+        for _ in range(size // min_literal_value_packet_size):
+            subpacket = get_literal_value_packet(binary_data[start_index:start_index + min_literal_value_packet_size])
+            if subpacket:
+                subpackets.append(subpacket)
+                start_index += min_literal_value_packet_size
 
+            if size // min_literal_value_packet_size == len(subpackets):
+                return subpackets
+
+    subpackets = []
     start_index = 0
     end_index = min_literal_value_packet_size
     while end_index < size:
@@ -171,62 +218,21 @@ def get_all_subpackets(binary_data: str, number_of_subpackets: int = 0) -> list:
     return subpackets
 
 
-def part1(binary_data: str) -> int:
-    size = len(binary_data)
-    master_operator_packet = get_operator_packet(binary_data)
-    print(master_operator_packet)
+def part1(master_operator_packet: Packet) -> int:
     return master_operator_packet.get_version_number_with_subpackets()
-    # version = int(binary_data[:3], 2)
-    # type_id = int(binary_data[3:6], 2)
-    # number = 0
-    # index = 6
-    # subpackets = []
-    #
-    # if type_id == 4: # literal value
-    #     number_bits = []
-    #
-    #     while True:
-    #         number_group = binary_data[index:index + 5]
-    #         number_bits.append(number_group[1:])
-    #         index += 5
-    #
-    #         if binary_data[index - 5] == '0':
-    #             break
-    #
-    #     number = int(''.join(number_bits), 2)
-    #     print(f'version={version}, type_id={type_id}, number={number}, index={index}, {binary_data[index:]}')
-    #
-    # else: # operator
-    #     length_type_id = binary_data[index]
-    #     index += 1
-    #     if length_type_id == '0':
-    #         total_length_of_subpackets = int(binary_data[index:index+15], 2)
-    #         index += 15
-    #         print(f'total length={total_length_of_subpackets}')
-    #         subpackets = get_all_subpackets(binary_data[index:index + total_length_of_subpackets])
-    #         print(subpackets)
-    #     else:
-    #         number_of_subpackets = int(binary_data[index:index+11], 2)
-    #         index += 11
-    #         print(f'number of subpackets={number_of_subpackets}')
-    #         subpackets = get_all_subpackets(binary_data[index:], number_of_subpackets=number_of_subpackets)
-    #         print(subpackets)
-    #
-    #     sum = 0
-    #
-    #     for subpacket in subpackets:
-    #         sum += subpacket.get_version_number_with_subpackets()
-    #
-    #     return sum
 
 
-def part2(edges: list) -> int:
-    pass
+def part2(master_operator_packet_part2: Packet) -> int:
+    return master_operator_packet_part2.get_value()
+
 
 if __name__ == '__main__':
+    start_time = time.time()
     input_array = load('input-16')
 
-    result_part1 = part1(input_array)
+    master_operator_packet = get_operator_packet(input_array)
+    print(f'calculate outermost packet takes: {time.time() - start_time} seconds')
+    result_part1 = part1(master_operator_packet)
     print(result_part1)
-    # result_part2 = part2(input_array)
-    # print(result_part2)
+    result_part2 = part2(master_operator_packet)
+    print(result_part2)
