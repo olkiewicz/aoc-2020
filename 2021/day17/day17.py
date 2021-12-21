@@ -62,7 +62,3 @@ if __name__ == '__main__':
     result = find_velocities(input_array)
     print(result[0])
     print(result[1])
-
-# 247 too low
-# 1292 too low
-# 4748
