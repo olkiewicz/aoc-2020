@@ -81,6 +81,7 @@ def part1(starting_pos: list[int]) -> int:
 
 
 def part2(starting_pos: list[int]) -> int:
+    points_to_win = 21
     previous_universes = Counter()
     p1_winning_universes = Counter()
     p2_winning_universes = Counter()
@@ -133,7 +134,9 @@ def part2(starting_pos: list[int]) -> int:
                 new_p1_pos = 10
             new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score + new_p1_pos, k.player2_score)
 
-            if new_universe in new_universes.keys():
+            if new_universe.player1_score >= points_to_win:
+                p1_winning_universes[new_universe] = v
+            elif new_universe in new_universes.keys():
                 new_universes[new_universe] += v
             else:
                 new_universes[new_universe] = v
@@ -141,7 +144,7 @@ def part2(starting_pos: list[int]) -> int:
     new_universes = {}  # copy(universes)
     previous_universes = copy(current_universes)
     current_universes = {}
-    # player 2
+    # player 2 turn
     # first roll
     for i in range(1, 4):
         for k, v in previous_universes.items():
@@ -164,6 +167,7 @@ def part2(starting_pos: list[int]) -> int:
             if new_p2_pos == 0:
                 new_p2_pos = 10
             new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score + new_p2_pos)
+
             if new_universe in new_universes.keys():
                 new_universes[new_universe] += v
             else:
@@ -179,7 +183,9 @@ def part2(starting_pos: list[int]) -> int:
             if new_p2_pos == 0:
                 new_p2_pos = 10
             new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score + new_p2_pos)
-            if new_universe in new_universes.keys():
+            if new_universe.player2_score >= points_to_win:
+                p2_winning_universes[new_universe] = v
+            elif new_universe in new_universes.keys():
                 new_universes[new_universe] += v
             else:
                 new_universes[new_universe] = v
