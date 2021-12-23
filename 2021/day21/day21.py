@@ -22,12 +22,6 @@ class Universe:
         self.player1_score = player1_score
         self.player2_score = player2_score
 
-    def roll(self, number: int):
-        new_pos = (self.player1_pos + number) % 10
-        if new_pos == 0:
-            new_pos = 10
-        self.player1_pos = new_pos
-
     def __repr__(self):
         return f'p1={self.player1_pos}, p2={self.player2_pos}, p1_score={self.player1_score}, p2_score={self.player2_score}'
 
@@ -75,9 +69,7 @@ def part1(starting_pos: list[int]) -> int:
         player2_pos = (player2_pos + first_roll + second_roll + third_roll) % 10
         player2_score += player2_pos if player2_pos != 0 else 10
 
-    result = min(player1_score, player2_score) * dice.number_of_rolls
-
-    return result
+    return min(player1_score, player2_score) * dice.number_of_rolls
 
 
 def part2(starting_pos: list[int]) -> int:
@@ -86,117 +78,165 @@ def part2(starting_pos: list[int]) -> int:
     p1_winning_universes = Counter()
     p2_winning_universes = Counter()
     player1_pos, player2_pos = starting_pos
-    t = Counter()
-    # t[Universe(player1_pos, player2_pos)] = 1
-    print(t)
+
     starting_universe = Universe(player1_pos, player2_pos)
     previous_universes[starting_universe] = 1
 
-    # while True:
-    # player1 turn
-    # first roll
-    new_universes = {}  # copy(universes)
-    current_universes = {}
-    for i in range(1, 4):
-        for k, v in previous_universes.items():
-            new_p1_pos = (k.player1_pos + i) % 10
-            if new_p1_pos == 0:
-                new_p1_pos = 10
-            new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score + new_p1_pos, k.player2_score)
-            if new_universe in new_universes.keys():
-                new_universes[new_universe] += v
-            else:
-                new_universes[new_universe] = v
-        current_universes.update(new_universes)
-    # second roll
-    new_universes = {}  # copy(universes)
-    previous_universes = copy(current_universes)
-    current_universes = {}
-    for i in range(1, 4):
-        for k, v in previous_universes.items():
-            new_p1_pos = (k.player1_pos + i) % 10
-            if new_p1_pos == 0:
-                new_p1_pos = 10
-            new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score + new_p1_pos, k.player2_score)
-            if new_universe in new_universes.keys():
-                new_universes[new_universe] += v
-            else:
-                new_universes[new_universe] = v
-        current_universes.update(new_universes)
-    # third roll
-    new_universes = {}  # copy(universes)
-    previous_universes = copy(current_universes)
-    current_universes = {}
-    for i in range(1, 4):
-        for k, v in previous_universes.items():
-            new_p1_pos = (k.player1_pos + i) % 10
-            if new_p1_pos == 0:
-                new_p1_pos = 10
-            new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score + new_p1_pos, k.player2_score)
+    while len(previous_universes) > 0:
+        # player1 turn
+        # first roll
+        new_universes = {}
+        current_universes = {}
+        for i in range(1, 4):
+            for k, v in previous_universes.items():
+                new_p1_pos = (k.player1_pos + i) % 10
 
-            if new_universe.player1_score >= points_to_win:
-                p1_winning_universes[new_universe] = v
-            elif new_universe in new_universes.keys():
-                new_universes[new_universe] += v
-            else:
-                new_universes[new_universe] = v
-        current_universes.update(new_universes)
-    new_universes = {}  # copy(universes)
-    previous_universes = copy(current_universes)
-    current_universes = {}
-    # player 2 turn
-    # first roll
-    for i in range(1, 4):
-        for k, v in previous_universes.items():
-            new_p2_pos = (k.player2_pos + i) % 10
-            if new_p2_pos == 0:
-                new_p2_pos = 10
-            new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score + new_p2_pos)
-            if new_universe in new_universes.keys():
-                new_universes[new_universe] += v
-            else:
-                new_universes[new_universe] = v
-        current_universes.update(new_universes)
-    # second roll
-    new_universes = {}  # copy(universes)
-    previous_universes = copy(current_universes)
-    current_universes = {}
-    for i in range(1, 4):
-        for k, v in previous_universes.items():
-            new_p2_pos = (k.player2_pos + i) % 10
-            if new_p2_pos == 0:
-                new_p2_pos = 10
-            new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score + new_p2_pos)
+                if new_p1_pos == 0:
+                    new_p1_pos = 10
 
-            if new_universe in new_universes.keys():
-                new_universes[new_universe] += v
-            else:
-                new_universes[new_universe] = v
-        current_universes.update(new_universes)
-    # third roll
-    new_universes = {}  # copy(universes)
-    previous_universes = copy(current_universes)
-    current_universes = {}
-    for i in range(1, 4):
-        for k, v in previous_universes.items():
-            new_p2_pos = (k.player2_pos + i) % 10
-            if new_p2_pos == 0:
-                new_p2_pos = 10
-            new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score + new_p2_pos)
-            if new_universe.player2_score >= points_to_win:
-                p2_winning_universes[new_universe] = v
-            elif new_universe in new_universes.keys():
-                new_universes[new_universe] += v
-            else:
-                new_universes[new_universe] = v
-        current_universes.update(new_universes)
-    print(len(previous_universes))
+                new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score, k.player2_score)
+
+                if new_universe in new_universes.keys():
+                    new_universes[new_universe] += v
+
+                else:
+                    new_universes[new_universe] = v
+
+            current_universes.update(new_universes)
+
+        # second roll
+        new_universes = {}
+        previous_universes = copy(current_universes)
+        current_universes = {}
+
+        for i in range(1, 4):
+            for k, v in previous_universes.items():
+                new_p1_pos = (k.player1_pos + i) % 10
+
+                if new_p1_pos == 0:
+                    new_p1_pos = 10
+
+                new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score, k.player2_score)
+
+                if new_universe in new_universes.keys():
+                    new_universes[new_universe] += v
+                else:
+                    new_universes[new_universe] = v
+
+            current_universes.update(new_universes)
+
+        # third roll
+        new_universes = {}
+        previous_universes = copy(current_universes)
+        current_universes = {}
+
+        for i in range(1, 4):
+            for k, v in previous_universes.items():
+                new_p1_pos = (k.player1_pos + i) % 10
+
+                if new_p1_pos == 0:
+                    new_p1_pos = 10
+                new_universe = Universe(new_p1_pos, k.player2_pos, k.player1_score + new_p1_pos, k.player2_score)
+
+                if new_universe.player1_score >= points_to_win:
+                    if new_universe in p1_winning_universes.keys():
+                        p1_winning_universes[new_universe] += v
+
+                    else:
+                        p1_winning_universes[new_universe] = v
+
+                elif new_universe in new_universes.keys():
+                    new_universes[new_universe] += v
+
+                else:
+                    new_universes[new_universe] = v
+
+            current_universes.update(new_universes)
+        new_universes = {}
+        previous_universes = copy(current_universes)
+        current_universes = {}
+
+        # player 2 turn
+        # first roll
+        for i in range(1, 4):
+            for k, v in previous_universes.items():
+                new_p2_pos = (k.player2_pos + i) % 10
+
+                if new_p2_pos == 0:
+                    new_p2_pos = 10
+
+                new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score)
+
+                if new_universe in new_universes.keys():
+                    new_universes[new_universe] += v
+
+                else:
+                    new_universes[new_universe] = v
+
+            current_universes.update(new_universes)
+
+        # second roll
+        new_universes = {}
+        previous_universes = copy(current_universes)
+        current_universes = {}
+
+        for i in range(1, 4):
+            for k, v in previous_universes.items():
+                new_p2_pos = (k.player2_pos + i) % 10
+
+                if new_p2_pos == 0:
+                    new_p2_pos = 10
+
+                new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score)
+
+                if new_universe in new_universes.keys():
+                    new_universes[new_universe] += v
+
+                else:
+                    new_universes[new_universe] = v
+
+            current_universes.update(new_universes)
+
+        # third roll
+        new_universes = {}
+        previous_universes = copy(current_universes)
+        current_universes = {}
+
+        for i in range(1, 4):
+            for k, v in previous_universes.items():
+                new_p2_pos = (k.player2_pos + i) % 10
+
+                if new_p2_pos == 0:
+                    new_p2_pos = 10
+
+                new_universe = Universe(k.player1_pos, new_p2_pos, k.player1_score, k.player2_score + new_p2_pos)
+
+                if new_universe.player2_score >= points_to_win:
+                    if new_universe in p2_winning_universes.keys():
+                        p2_winning_universes[new_universe] += v
+
+                    else:
+                        p2_winning_universes[new_universe] = v
+
+                elif new_universe in new_universes.keys():
+                    new_universes[new_universe] += v
+
+                else:
+                    new_universes[new_universe] = v
+
+            current_universes.update(new_universes)
+        previous_universes = copy(current_universes)
+
+    p1 = sum(p1_winning_universes.values())
+    p2 = sum(p2_winning_universes.values())
+
+    return max(p1, p2)
 
 
 if __name__ == '__main__':
     input_array = load('input-21')
 
-    # result_part1 = part1(input_array)
-    # print(result_part1)
+    result_part1 = part1(input_array)
+    print(result_part1)
     result_part2 = part2(input_array)
     print(result_part2)
