@@ -1,5 +1,6 @@
 import math
 from copy import copy
+from typing import Optional
 
 
 def load(name: str) -> list[str]:
@@ -55,7 +56,7 @@ def alu(instructions: list[str], input_numbers) -> int:  # it's useless
     return variables['z']
 
 
-def reverse_alu(instructions: list[str]) -> list[int]:
+def reverse_alu(instructions: list[str], final_z_value) -> Optional[list[tuple[int, int]]]:
     possible_values = []
     starting_variables = {'z': 0}
 
@@ -67,7 +68,7 @@ def reverse_alu(instructions: list[str]) -> list[int]:
             starting_variables[commands[1]] = 0
 
     input_variable = instructions[0].split(' ')[1]
-    for possible_z in range(-27, 27):
+    for possible_z in range(-50, 50):
         for possible_value in range(1, 10):
             variables = copy(starting_variables)
             variables[input_variable] = possible_value
@@ -111,18 +112,30 @@ def reverse_alu(instructions: list[str]) -> list[int]:
                     b_value = int(b) if b[0] == '-' or b.isnumeric() else variables[b]
                     variables[a] = 1 if a_value == b_value else 0
             else:
-                print(f'z={variables["z"]}')
-                if variables['z'] == 0:
-                    possible_values.append(possible_value)
+                # print(f'z={variables["z"]}')
+                if variables['z'] == final_z_value:
+                    possible_values.append((possible_value, possible_z))
 
+    if len(possible_values) == 0:
+        return None
 
     return possible_values
 
 
 def part1(instructions: list[str]) -> int:
-    values = reverse_alu(instructions[-18:])
+    final_z_value = 0
+    input_values = []
+    # while len(instructions) > 0:
+    result = reverse_alu(instructions[-18:], final_z_value)
 
-    return len(values)
+    for res in result:
+        copy_of_instructions = copy(instructions)
+        input_value, z_value = res
+        instructions = instructions[:-18]
+        input_values.append(input_value)
+
+
+    return len(input_values)
 
 
 def part2(instructions: list[list]) -> int:
